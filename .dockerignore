@@ -1,0 +1,6 @@
+.git
+docs
+k8s
+src
+Jenkinsfile
+*.md

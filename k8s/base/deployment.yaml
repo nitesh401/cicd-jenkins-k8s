@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-service
+  labels: { app: my-service }
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxSurge: 1, maxUnavailable: 0 }
+  selector:
+    matchLabels: { app: my-service }
+  template:
+    metadata:
+      labels: { app: my-service }
+    spec:
+      # imagePullSecrets:            # uncomment for a private registry
+      #   - name: regcred
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: my-service
+          image: IMAGE_PLACEHOLDER      # replaced by the pipeline
+          ports: [{ containerPort: 8080 }]
+          resources:
+            requests: { cpu: 250m, memory: 512Mi }
+            limits:   { cpu: "1",  memory: 1Gi }
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: 8080 }
+            initialDelaySeconds: 20
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: 8080 }
+            initialDelaySeconds: 40
+            periodSeconds: 10
